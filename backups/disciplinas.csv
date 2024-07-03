@@ -1,0 +1,41 @@
+id_disciplina,nome,carga_horaria
+1,Matemática Discreta,60
+2,Algoritmos e Estruturas de Dados I,80
+3,Algoritmos e Estruturas de Dados II,80
+4,Banco de Dados I,60
+5,Banco de Dados II,60
+6,Programação Orientada a Objetos I,80
+7,Programação Orientada a Objetos II,80
+8,Redes de Computadores I,60
+9,Redes de Computadores II,60
+10,Engenharia de Software I,60
+11,Engenharia de Software II,60
+12,Sistemas Operacionais,60
+13,Introdução à Computação,60
+14,Cálculo I,60
+15,Cálculo II,60
+16,Álgebra Linear,60
+17,Física I,60
+18,Física II,60
+19,Estatística,60
+20,Lógica de Programação,60
+21,Desenvolvimento Web,80
+22,Inteligência Artificial,60
+23,Sistemas Distribuídos,60
+24,Segurança da Informação,60
+25,Análise e Projeto de Sistemas,60
+26,Gestão de Projetos,60
+27,Computação Gráfica,60
+28,Mineração de Dados,60
+29,Programação Funcional,60
+30,Compiladores,60
+31,Realidade Virtual,60
+32,Big Data,60
+33,Computação em Nuvem,60
+34,Arquitetura de Computadores,60
+35,Tópicos Avançados em Computação,60
+36,Empreendedorismo,60
+37,Inglês Técnico,60
+38,Tecnologias Emergentes,60
+39,Ética na Computação,60
+40,Seminários em Computação,60

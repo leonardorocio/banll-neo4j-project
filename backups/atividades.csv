@@ -1,0 +1,16 @@
+id_atividade,descricao_atividade,dt_entrega,fk_professor,fk_turma,fk_tipo_atividade
+1,Trabalho de pesquisa sobre a história da computação,2023-04-15,15,3,2
+3,Desenvolvimento de um trabalho prático utilizando algoritmos simples,2023-06-05,15,3,2
+4,"Desenvolvimento de um site estático utilizando HTML, CSS e JavaScrip",2023-04-20,13,2,2
+6,Desenvolvimento de um blog dinâmico com CRUD em PHP e MySQL,2023-06-10,13,2,2
+5,Implementação de um sistema de login utilizando Node.js e Express,2023-05-15,13,2,2
+8,Trabalho sobre álgebra booleana e circuitos lógico,2023-05-25,2,4,2
+9,Apresentação sobre grafos e suas aplicações,2023-06-20,2,4,2
+15,Trabalho prático de desenvolvimento de algoritmos,2023-06-25,2,1,2
+2,Prova teórica sobre conceitos básicos de computação,2023-05-10,15,3,1
+7,"TProva sobre conjuntos, relações e funções",2023-05-01,2,4,1
+10,Prova sobre limites e derivadas,2023-05-05,8,5,1
+11,Prova sobre integrais definidas,2023-05-30,8,5,1
+12,Apresentação sobre aplicações da derivada,2023-06-25,8,5,1
+13,Prova sobre estruturas de controle,2023-04-05,2,1,1
+14,Prova sobre arrays e funções,2023-05-30,2,1,1
