@@ -82,6 +82,18 @@ MATCH (a:Aluno {id_aluno: toInteger(row.id_aluno)})
 MATCH (at:Atividade {id_atividade: toInteger(row.id_atividade)})
 CREATE (a)-[:PARTICIPA_EM]->(at);
 
+LOAD CSV WITH HEADERS FROM 'file:///backups/atividade_aluno.csv' AS row
+CREATE (:Nota {
+    nota: toFloat(row.nota),
+});
+
+LOAD CSV WITH HEADERS FROM 'file:///backups/atividade_aluno.csv' AS row
+MATCH (n:Nota {nota: row.nota})
+MATCH (a:Aluno {id_aluno: toInteger(row.id_aluno)})
+MATCH (at:Atividade {id_atividade: toInteger(row.id_atividade)})
+CREATE (a)-[:NOTA_ALUNO]->(n);
+CREATE (at)-[:NOTA_ATIVIDADE]->(n);
+
 // Relacionamento entre cursos e disciplinas
 LOAD CSV WITH HEADERS FROM 'file:///backups/cursos_disciplinas.csv' AS row
 MATCH (c:Curso {id_curso: toInteger(row.id_curso)})
