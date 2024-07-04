@@ -84,7 +84,7 @@ CREATE (a)-[:PARTICIPA_EM]->(at);
 
 LOAD CSV WITH HEADERS FROM 'file:///backups/atividade_aluno.csv' AS row
 CREATE (:Nota {
-    nota: toFloat(row.nota),
+    nota: toFloat(row.nota)
 });
 
 LOAD CSV WITH HEADERS FROM 'file:///backups/atividade_aluno.csv' AS row
