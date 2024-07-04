@@ -90,8 +90,11 @@ CREATE (:Nota {
 LOAD CSV WITH HEADERS FROM 'file:///backups/atividade_aluno.csv' AS row
 MATCH (n:Nota {nota: row.nota})
 MATCH (a:Aluno {id_aluno: toInteger(row.id_aluno)})
-MATCH (at:Atividade {id_atividade: toInteger(row.id_atividade)})
 CREATE (a)-[:NOTA_ALUNO]->(n);
+
+LOAD CSV WITH HEADERS FROM 'file:///backups/atividade_aluno.csv' AS row
+MATCH (n:Nota {nota: row.nota})
+MATCH (at:Atividade {id_atividade: toInteger(row.id_atividade)})
 CREATE (at)-[:NOTA_ATIVIDADE]->(n);
 
 // Relacionamento entre cursos e disciplinas
