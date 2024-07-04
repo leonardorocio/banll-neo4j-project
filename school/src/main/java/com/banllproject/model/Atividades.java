@@ -1,15 +1,17 @@
 package com.banllproject.model;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
+import org.neo4j.driver.Record;
+import org.neo4j.driver.Result;
 import org.neo4j.driver.Session;
+import org.neo4j.driver.Value;
+import org.neo4j.driver.Values;
 
 import com.banllproject.ConexaoNeo4j;
 import com.banllproject.view.Menu;
@@ -19,7 +21,7 @@ public class Atividades {
     private static Session conexao = ConexaoNeo4j.getInstance().getSession();
     private int idAtividade;
     private String descricaoAtividade;
-    private Date dtEntrega;
+    private LocalDate dtEntrega;
 
     private int fkTipoAtividade;
     private TipoAtividades fkTipoAtividadesObject;
@@ -31,13 +33,13 @@ public class Atividades {
     // N:N
     private int idAlunoAtividade;
 
-    public Atividades(int idAtividade, String descricaoAtividade, Date dtEntrega) {
+    public Atividades(int idAtividade, String descricaoAtividade, LocalDate dtEntrega) {
         this.idAtividade = idAtividade;
         this.descricaoAtividade = descricaoAtividade;
         this.dtEntrega = dtEntrega;
     }
 
-    public Atividades(String descricaoAtividade, Date dtEntrega, int fkProfessores, int fkTurma,
+    public Atividades(String descricaoAtividade, LocalDate dtEntrega, int fkProfessores, int fkTurma,
             int fkTipoAtividade) {
         this.descricaoAtividade = descricaoAtividade;
         this.dtEntrega = dtEntrega;
@@ -46,7 +48,7 @@ public class Atividades {
         this.fkTipoAtividade = fkTipoAtividade;
     }
 
-    public Atividades(int idAtividade, String descricaoAtividade, Date dtEntrega,
+    public Atividades(int idAtividade, String descricaoAtividade, LocalDate dtEntrega,
             int fkProfessores, Professores fkProfessoresObject, int fkTurma, Turmas fkTurmasObject, int fkTipoAtividade,
             TipoAtividades fkTipoAtividadesObject) {
         this.idAtividade = idAtividade;
@@ -79,11 +81,11 @@ public class Atividades {
         this.descricaoAtividade = descricaoAtividade;
     }
 
-    public Date getDtEntrega() {
+    public LocalDate getDtEntrega() {
         return dtEntrega;
     }
 
-    public void setDtEntrega(Date dtEntrega) {
+    public void setDtEntrega(LocalDate dtEntrega) {
         this.dtEntrega = dtEntrega;
     }
 
@@ -161,127 +163,170 @@ public class Atividades {
     }
 
     public static Atividades getById(int idAtividade)  {
-        String sql = "SELECT * FROM atividades WHERE id_atividade = ?";
-        PreparedStatement statement = conexao.prepareStatement(sql);
-        statement.setInt(1, idAtividade);
-        ResultSet result = statement.executeQuery();
-        if (result.next()) {
-            int fk_professor = result.getInt("fk_professor");
-            Professores professores = new Professores();
-            if (fk_professor != 0) {
-                professores = Professores.getById(fk_professor);
-            }
-            int fk_turma = result.getInt("fk_turma");
-            Turmas turmas = new Turmas();
-            if (fk_turma != 0) {
-                turmas = Turmas.getById(fk_turma);
-            }
-            int fk_tipo = result.getInt("fk_tipo_atividade");
-            TipoAtividades tipo = new TipoAtividades();
-            if (fk_tipo != 0) {
-                tipo = TipoAtividades.getById(fk_tipo);
-            }
-            return new Atividades(
-                    result.getInt("id_atividade"),
-                    result.getString("descricao_atividade"),
-                    result.getDate("dt_entrega"),
+        return conexao.readTransaction(tx -> {
+            String query = "MATCH (t:Atividade {id_atividade: $idAtividade})-[r:APLICADA_POR]->(p:Professor) " +
+                           "MATCH (t:Atividade {id_atividade: $idAtividade})-[c:APLICADA_EM]->(b:Turma) " + 
+                           "MATCH (t:Atividade {id_atividade: $idAtividade})-[a:TIPO_DE]->(ta:TipoAtividade) " + 
+                           "RETURN t.id_atividade as idAtividade, t.descricao_atividade as descricao, t.dt_entrega as dt_entrega, " +
+                           "ta.id_tipo_atividade as fk_tipo_atividade, " +
+                           "b.id_turma as fk_turma, " +
+                           "p.id_professor as fk_professor";
+        
+            Result result = tx.run(query, Values.parameters("idAtividade", idAtividade));
+        
+            if (result.hasNext()) {
+                Record record = result.next();
+
+                int fk_professor = record.get("fk_professor").asInt();
+                Professores professores = new Professores();
+                if (fk_professor != 0) {
+                    professores = Professores.getById(fk_professor);
+                }
+                int fk_turma = record.get("fk_turma").asInt();
+                Turmas turmas = new Turmas();
+                if (fk_turma != 0) {
+                    turmas = Turmas.getById(fk_turma);
+                }
+                int fk_tipo = record.get("fk_tipo_atividade").asInt();
+                TipoAtividades tipo = new TipoAtividades();
+                if (fk_tipo != 0) {
+                    tipo = TipoAtividades.getById(fk_tipo);
+                }
+        
+                return new Atividades(
+                    record.get("idAtividade").asInt(),
+                    record.get("descricao").asString(),
+                    record.get("dt_entrega").asLocalDate(),
                     fk_professor,
                     professores,
                     fk_turma,
                     turmas,
                     fk_tipo,
                     tipo);
-        } else {
-            System.out.println("Atividade não encontrada com esse ID!");
-            return new Atividades();
-        }
-    }
-
-    public static int create(Atividades atividade)  {
-        atividade.imprimeAtividade();
-        String sql = "INSERT INTO atividades (descricao_atividade, dt_entrega, fk_professor, fk_turma, fk_tipo_atividade) VALUES (?, ?, ?, ?, ?)";
-        PreparedStatement preparedStatement = conexao.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        preparedStatement.setString(1, atividade.getDescricaoAtividade());
-        preparedStatement.setDate(2, atividade.getDtEntrega());
-        preparedStatement.setInt(3, atividade.getFkProfessores());
-        preparedStatement.setInt(4, atividade.getFkTurma());
-        preparedStatement.setInt(5, atividade.getFkTipoAtividade());
-        preparedStatement.execute();
-        ResultSet keys = preparedStatement.getGeneratedKeys();
-        int keyValue = -1;
-        if (keys.next()) {
-            keyValue = keys.getInt(1);
-            return keyValue;
-        }
-        preparedStatement.close();
-        return keyValue;
-    }
-
-    public static void update(List<String> updatedFields, Atividades atividade)  {
-        String setFields = "SET ";
-        for (int i = 0; i < updatedFields.size(); i++) {
-            if (i < updatedFields.size() - 1)
-                setFields += updatedFields.get(i) + " = ?,";
-            else
-                setFields += updatedFields.get(i) + " = ?";
-        }
-        String sql = "UPDATE atividades " + setFields + " WHERE id_atividade = ?";
-        PreparedStatement preparedStatement = conexao.prepareStatement(sql);
-        int i;
-        for (i = 1; i <= updatedFields.size(); i++) {
-            if (updatedFields.get(i - 1).equals("descricao_atividade")) {
-                preparedStatement.setString(i, atividade.getDescricaoAtividade());
+            } else {
+                System.out.println("Atividade não encontrada com esse ID!");
+                return new Atividades();
             }
-            if (updatedFields.get(i - 1).equals("dt_entrega")) {
-                preparedStatement.setDate(i, atividade.getDtEntrega());
-            }
-        }
-        preparedStatement.setInt(i, atividade.getIdAtividade());
-        preparedStatement.executeUpdate();
-        preparedStatement.close();
-    }
-
-    public static void delete(int idAtividade)  {
-        String sql = "DELETE FROM atividades WHERE id_atividade = ?";
-        PreparedStatement preparedStatement = conexao.prepareStatement(sql);
-        preparedStatement.setInt(1, idAtividade);
-        preparedStatement.executeUpdate();
-        preparedStatement.close();
+        });  
     }
 
     public static List<Atividades> getAll()  {
-        String sql = "SELECT * FROM atividades";
-        Statement statement = conexao.createStatement();
-        ResultSet resultList = statement.executeQuery(sql);
-        List<Atividades> atividades = new ArrayList<>();
-        while (resultList.next()) {
-            int fk_professor = resultList.getInt("fk_professor");
-            Professores professores = new Professores();
-            if (fk_professor != 0) {
-                professores = Professores.getById(fk_professor);
-            }
-            int fk_turma = resultList.getInt("fk_turma");
-            Turmas turmas = new Turmas();
-            if (fk_turma != 0) {
-                turmas = Turmas.getById(fk_turma);
-            }
-            int fk_tipo = resultList.getInt("fk_tipo_atividade");
-            TipoAtividades tipo = new TipoAtividades();
-            if (fk_tipo != 0) {
-                tipo = TipoAtividades.getById(fk_tipo);
-            }
-            atividades.add(new Atividades(
-                    resultList.getInt("id_atividade"),
-                    resultList.getString("descricao_atividade"),
-                    resultList.getDate("dt_entrega"),
+        return conexao.readTransaction(tx -> {
+            String query = "MATCH (t:Atividade)-[r:APLICADA_POR]->(p:Professor) " +
+                           "MATCH (t:Atividade)-[c:APLICADA_EM]->(b:Turma) " + 
+                           "MATCH (t:Atividade)-[a:TIPO_DE]->(ta:TipoAtividade) " + 
+                           "RETURN t.id_atividade as idAtividade, t.descricao_atividade as descricao, t.dt_entrega as dt_entrega, " +
+                           "ta.id_tipo_atividade as fk_tipo_atividade, " +
+                           "b.id_turma as fk_turma, " +
+                           "p.id_professor as fk_professor";
+        
+            Result result = tx.run(query);
+            List<Atividades> atividades = new ArrayList<>();
+            while (result.hasNext()) {
+                Record record = result.next();
+
+                int fk_professor = record.get("fk_professor").asInt();
+                Professores professores = new Professores();
+                if (fk_professor != 0) {
+                    professores = Professores.getById(fk_professor);
+                }
+                int fk_turma = record.get("fk_turma").asInt();
+                Turmas turmas = new Turmas();
+                if (fk_turma != 0) {
+                    turmas = Turmas.getById(fk_turma);
+                }
+                int fk_tipo = record.get("fk_tipo_atividade").asInt();
+                TipoAtividades tipo = new TipoAtividades();
+                if (fk_tipo != 0) {
+                    tipo = TipoAtividades.getById(fk_tipo);
+                }
+        
+                atividades.add(new Atividades(
+                    record.get("idAtividade").asInt(),
+                    record.get("descricao").asString(),
+                    record.get("dt_entrega").asLocalDate(),
                     fk_professor,
                     professores,
                     fk_turma,
                     turmas,
                     fk_tipo,
                     tipo));
-        }
-        return atividades;
+            }
+            return atividades;
+        });  
+    }
+
+    public static int create(Atividades atividade)  {
+        return conexao.writeTransaction(tx -> {
+            String query = "MATCH (p:Professor {id_professor: $fkProfessor}) " +
+                        "MATCH (ta:TipoAtividade {id_tipo_atividade: $fkTipoAtividade}) " +
+                        "MATCH (t:Turma {id_turma: $fkTurma}) " +
+                        "MERGE (a:Atividade {id_atividade: $idAtividade, descricao_atividade: $descricao, dt_entrega: $dt_entrega}) " +
+                        "CREATE (a)-[:APLICADA_POR]->(p) " +
+                        "CREATE (a)-[:APLICADA_EM]->(t) " +
+                        "CREATE (a)-[:TIPO_DE]->(ta) " +
+                        "RETURN a.id_atividade as id";
+            
+            Result result = tx.run(query, 
+            Values.parameters(                  "idAtividade", new Random().nextInt(0, 100000),
+                                                "descricao", atividade.getDescricaoAtividade(),
+                                                "dt_entrega", atividade.getDtEntrega(),
+                                                "fkProfessor", atividade.getFkProfessores(),
+                                                "fkTipoAtividade", atividade.getFkTipoAtividade(),
+                                                "fkTurma", atividade.getFkTurma()));
+
+            if (result.hasNext()) {
+                return result.next().get("id").asInt();
+            } else {
+                return -1;
+            }
+        });
+    }
+
+    public static void update(List<String> updatedFields, Atividades atividade)  {
+        conexao.writeTransaction(tx -> {
+            StringBuilder setFields = new StringBuilder();
+            for (int i = 0; i < updatedFields.size(); i++) {
+                if (i < updatedFields.size() - 1)
+                    setFields.append("c.").append(updatedFields.get(i)).append(" = $").append(updatedFields.get(i)).append(", ");
+                else
+                    setFields.append("c.").append(updatedFields.get(i)).append(" = $").append(updatedFields.get(i));
+            }
+
+            String query = "MATCH (c:Atividade {id_atividade: $idAtividade}) " + 
+                           "SET " + setFields.toString();
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("idAtividade", atividade.getIdAtividade());
+
+            for (String field : updatedFields) {
+                switch (field) {
+                    case "descricao_atividade":
+                        params.put("descricao_atividade", atividade.getDescricaoAtividade());
+                        break;
+                    case "dt_entrega":
+                        params.put("dt_entrega", atividade.getDtEntrega());
+                        break;
+                }
+            }
+
+            tx.run(query, params);
+            return null;
+        });
+    }
+
+    public static void delete(int idAtividade)  {
+        conexao.writeTransaction(tx -> {
+            String query =  "MATCH (t:Atividade {id_atividade: $idAtividade})-[r:APLICADA_POR]->(p:Professor) " +
+                            "MATCH (t:Atividade {id_atividade: $idAtividade})-[b:APLICADA_EM]->(c:Turma) " + 
+                            "MATCH (t:Atividade {id_atividade: $idAtividade})-[a:TIPO_DE]->(ta:TipoAtividade) " +
+                            "DETACH DELETE t";
+
+            Value params = Values.parameters("idAtividade", idAtividade);
+
+            tx.run(query, params);
+            return null;
+        });
     }
 
 }

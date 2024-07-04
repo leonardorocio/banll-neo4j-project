@@ -4,7 +4,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import com.banllproject.controller.AlunosController;
-// import com.banllproject.controller.AtividadesController;
+import com.banllproject.controller.AtividadesController;
 import com.banllproject.controller.Controller;
 import com.banllproject.controller.CursosController;
 import com.banllproject.controller.DepartamentosController;
@@ -126,9 +126,9 @@ public class Menu {
                 case 5:
                     Menu.menuEntidade(new ProfessoresController(), "Professores");
                     break;
-                // case 6:
-                //     Menu.menuEntidade(new AtividadesController(), "Atividades Avaliativas");
-                //     break;
+                case 6:
+                    Menu.menuEntidade(new AtividadesController(), "Atividades Avaliativas");
+                    break;
                 case 7:
                     Menu.menuEntidade(new DepartamentosController(), "Departamentos");
                     break;

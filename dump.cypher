@@ -106,6 +106,18 @@ MATCH (at:Atividade {id_atividade: toInteger(row.id_atividade)})
 MATCH (ta:TipoAtividade {id_tipo_atividade: toInteger(row.fk_tipo_atividade)})
 CREATE (at)-[:TIPO_DE]->(ta);
 
+// Relacionamento entre atividades e professores
+LOAD CSV WITH HEADERS FROM 'file:///backups/atividades.csv' AS row
+MATCH (at:Atividade {id_atividade: toInteger(row.id_atividade)})
+MATCH (p:Professor {id_professor: toInteger(row.fk_professor)})
+CREATE (at)-[:APLICADA_POR]->(p);
+
+// Relacionamento entre atividades e turmas
+LOAD CSV WITH HEADERS FROM 'file:///backups/atividades.csv' AS row
+MATCH (at:Atividade {id_atividade: toInteger(row.id_atividade)})
+MATCH (t:Turma {id_turma: toInteger(row.fk_turma)})
+CREATE (at)-[:APLICADA_EM]->(t);
+
 // Relacionamento entre turmas e professores
 LOAD CSV WITH HEADERS FROM 'file:///backups/turma_professor.csv' AS row
 MATCH (t:Turma {id_turma: toInteger(row.id_turma)})
