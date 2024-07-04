@@ -24,7 +24,7 @@ Para executar este projeto existem alguns pré-requisitos:
       Após a criação do projeto, criar um novo banco, clicando no botão de "Add" e em seguida "Local DBMS";
     </li>
     <li>
-      Com o banco criado, iniciar uma conexão, ir no botão "Open Folder" para abrir uma pasta e abrir a pasta "Import"
+      Com o banco criado, iniciar uma conexão, ir no botão "Open Folder" que fica nos 3 pontos ao lado do botão "Open" para abrir uma pasta e abrir a pasta "Import"
     </li>
     <li>
       Copiar a pasta de backup deste repositório para a pasta "Import";
@@ -32,8 +32,10 @@ Para executar este projeto existem alguns pré-requisitos:
     <li>
       Em seguida, abrir o Neo4j Browser e executar o script de dump encontrado no arquivo "dump.cypher", neste repositório.
     </li>
+    <li>
+      Novamente, no mesmo botão onde fica "Open Folder", abrir as "settings" e procurar por "dbms.security.auth_enabled=true" e trocar para false.
+    </li>
   </ul>
-  <li>No arquivo project.properties, alterar as configurações de conexão do banco de dados inserindo suas próprias credenciais e o banco de dados no qual foi executado o arquivo de dump;</li>
 
   <li>Após configurados Java e Maven, em um terminal na pasta do projeto, mais especificamente em /banII-project/school,  utilizar o seguinte comando: mvn compile exec:java</li>
   <li>Pronto! O projeto já está executando.</li>
